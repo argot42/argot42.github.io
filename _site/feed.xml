@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Your awesome title</title>
-    <description>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
-</description>
+    <title>Totally Awesome BLOGU</title>
+    <description>Totally awesome blog for coolio ppl</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 15 Jan 2016 17:50:15 -0300</pubDate>
-    <lastBuildDate>Fri, 15 Jan 2016 17:50:15 -0300</lastBuildDate>
+    <pubDate>Sun, 17 Jan 2016 22:08:21 -0300</pubDate>
+    <lastBuildDate>Sun, 17 Jan 2016 22:08:21 -0300</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>First Post</title>
+        <description>&lt;p&gt;First post. testin…&lt;/p&gt;
+
+&lt;p&gt;check out &lt;a href=&quot;http://argot.moe&quot;&gt;ma site&lt;/a&gt; it’s pretty cool and has pretty cool music too.&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 17 Jan 2016 22:00:44 -0300</pubDate>
+        <link>http://yourdomain.com/testing/2016/01/17/primer-post.html</link>
+        <guid isPermaLink="true">http://yourdomain.com/testing/2016/01/17/primer-post.html</guid>
+        
+        
+        <category>testing</category>
+        
+      </item>
     
       <item>
         <title>Welcome to Jekyll!</title>
