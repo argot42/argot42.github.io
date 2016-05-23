@@ -3,9 +3,9 @@ layout: page
 title: About
 #permalink: /about/
 ref: about
-lang: en
+lang: es
 ---
-UTN Systems Engineering student and GNU+Linux enthusiast. I love rms.
+Estudiante de Ingerniería en Sistemas en la UTN, uso GNU+Linux y amo a rms.
 
 
 [❤](https://sushigirl.tokyo "Best chan you'll ever visit")

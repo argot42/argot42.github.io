@@ -1,40 +1,40 @@
 ---
 layout: post
-title:  "Installing rTorrent and ruTorrent with nginx (on debian jessie)"
+title:  "Instalar rTorrent y ruTorrent con Nginx (on debian jessie)"
 ref: rtorrent-install
 date:   2016-05-19 02:43:00 -0300
 categories: bittorrent
 tags: webserver, bittorrent, rutorrent, libtorrent, rtorrent, nginx
-lang: en
+lang: es
 --- 
 
-## Preparing to Install
+## Preparar Instalación
 
-### 1. Set up new user
+### 1. Crear un nuevo usuario
 
 ```
 sudo useradd -d /opt/rtorrent -m rtorrent
 ```
 
-### 2. Install some tools
+### 2. Instalar algunas herramientas
 
 ```
 sudo apt-get install subversion git build-essential automake libtool pkg-config
 ```
 
-You are going to need these to download the repos and compile them.
+Vas a necesitar estas para descargar los repositorios y compilarlos.
 
 ## Libtorrent+rTorrent
 
-### 1. Install dependencies
+### 1. Instalar dependencias
 
 ```
 sudo apt-get install libsigc++-2.0-dev libncurses5-dev curl libcurl4-openssl-dev libcppunit-dev
 ```
 
-### 2. Install XMLRPC
+### 2. Instalar XMLRPC
 
-Download the [repository][xmlrpc-c-repo] and compile it.
+Descarga el [repositorio][xmlrpc-c-repo] y compilalo.
 
 ```
 svn checkout http://svn.code.sf.net/p/xmlrpc-c/code/stable xmlrpc-c
@@ -44,9 +44,9 @@ make
 sudo make install
 ```
 
-### 3. Install Libtorrent
+### 3. Instalar Libtorrent
 
-Clone rakshasa Libtorrent [repo][libtorrent-repo] and compile.
+Clona el [repositorio][libtorrent-repo] de Libtorrent y compilalo.
 
 ```
 git clone https://github.com/rakshasa/libtorrent
@@ -57,9 +57,9 @@ make
 sudo make install
 ```
 
-### 4. Install rTorrent
+### 4. Instalar rTorrent
 
-Clone rakshasa rTorrent [repo][rtorrent-repo] and compile it.
+Clona el [repositorio][rtorrent-repo] de rTorrent y compilalo.
 
 ```
 git clone https://github.com/rakshasa/rtorrent
@@ -73,32 +73,32 @@ sudo ldconfig
 
 ### 5. Set up rTorrent
 
-Create directories needed.
+Crea los directorios necesarios para que funcione rTorrent.
 
 ```
 sudo mkdir -p /opt/rtorrent/{session,watch}
 sudo chown -R rtorrent: /opt/rtorrent
 ```
 
-Copy config file that came with the source code to rTorrent's home directory.
+Copia el archivo de configuración que viene con el repositorio en el home directory del usuario rTorrent.
 
 ```
 sudo cp doc/rtorrent.rc /opt/rtorrent/.rtorrent.rc
 ```
 
-And modify it as you see fit. You can find resources to help you setting up your config file [here][rtorrent-wiki-repo]. You Also will need to port forward the necessary ports (check in your config file on what ports did you set rTorrent to listen).
+Y modificalo como prefieras. [Acá][rtorrent-wiki-repo] vas a encontrar información que te va a ayudar a configurarlo. También vas a necesitar hacer un port forwarding de algunos puertos (revisa en el archivo de configuración para ver en que puertos esta escuchando rTorrent).
 
-Now rTorrent should be working. To test it, log into the rTorrent user (set up it up a password if you didn't) and run rTorrent.
+Ahora rTorrent debería estar funcionando. Para testearlo logeate con el usuario rTorrent (generale una contraseña con passwd si no lo hiciste) y ejecutalo.
 
-### 6. Auto starting rTorrent with systemd-units
+### 6. Arrancar automáticamente rTorrent con las systemd-units
 
-First install [tmux][the-tao-of-tmux] to run rTorrent without needing a terminal open (and be able to attach it later if you want to).
+Primero instala [tmux][the-tao-of-tmux] para correr rTorrent sin necesidad de tener una terminal abierta (y poder reanudar la sesión cuando quieras).
 
 ```
 sudo apt-get install tmux
 ```
 
-Create systemd unit.
+Crea un systemd unit.
 
 ```
 /etc/systemd/system/rtorrent@.service
@@ -120,15 +120,15 @@ ExecStop=/usr/bin/tmux send-keys -t rtorrent:rtorrent C-q
 
 {% endhighlight %}
 
-The name of the service must be name-of-service@.service, the extension tells systemd this unit describes a ***service*** and the @ that it is a ***instanced service unit***. That, and the directives, are explained [here][systemd-service], but basically you can do this
+El nombre del archivo debe ser <nombre-del-servicio>@.service, systemd trata a archivos con esa extensión como unidades que describe ***servicios*** y el @ que es un ***instanced service unit***. Eso, y las directivas, están explicadas [acá][systemd-service], pero básicamente podes hacer esto
 
 ```
 systemctl start rtorrent@<user>
 ```
 
-and run multiples instances of the service with different users (%i is replaced by the user after the @).
+y correr instancias múltiples del servicio con diferentes usuarios (%i es reemplazado por el usuario después de @).
 
-Now for rTorrent to run automatically when the system starts just enable the unit.
+Ahora para que rTorrent arranque al inicio del sistema tenes que habilitar la unidad.
 
 ```
 systemctl enable rtorrent@<user>
@@ -136,23 +136,23 @@ systemctl enable rtorrent@<user>
 
 ## ruTorrent
 
-### 1. Install dependencies
+### 1. Instalar dependencias
 
-Having rTorrent working, you will now install the sofware needed for ruTorrent, some of its plugins and nginx.
+Con rTorrent funcionando ahora instala el software necesario para rutorrent, algunos de sus plugins y Nginx
 
 ```
 sudo apt-get install nginx php5 php5-cli php5-fpm php5-xmlrpc mediainfo unrar-free 
 ```
 
-Clone the ruTorrent [repo][rutorrent-repo].
+Clona el [repositorio][rutorrent-repo] de ruTorrent.
 
 ```
 sudo git clone https://github.com/Novik/ruTorrent
 ```
 
-### 2. Set up Nginx
+### 2. Nginx
 
-Move rTorrent repo where you like to have your website (I'm going to use /var/www) and change the ownership of some directories.
+Mueve el repositorio clonado a donde quisieras tener tu pagina funcionando (Yo voy a usar /var/www) y cambia el propietario y el grupo de algunos directorios.
 
 ```
 sudo mv rTorrent /var/www
@@ -160,9 +160,9 @@ sudo chown -R www-data: /var/www/ruTorrent/share/{setting,rtorrents}
 sudo chown -R rtorrent: /var/www/ruTorrent/share/users
 ```
 
-### 2.1. Create page config 
+### 2.1. Crear archivo de configuración
 
-Create the next file but be careful this configuration is not secured with password so everybody with access to your port 80 will be able to mess around with rTorrent ~~and potentially delete all your anime collection~~. If the port is not facing the internet it shouldn't be a big problem but it'll be better if you use it just for testing and eventually update your configuration to match the one in the part 2.2.
+Crea el siguiente archivo pero tené en cuenta que esta configuración no protege a rTorrent con un login por lo que cualquiera que tenga acceso a tu puerto 80 podrá usar rTorrent libremente ~~y borrar tu colección de anime~~. Si el puerto no esta abierto a internet esto no debería ser un gran problema pero sería mejor que solo lo usaras para probar tu install y luego actualices tu configuración para que coincida con la de la sección 2.2.
 
 ```
 /etc/nginx/sites-available/rutorrent
@@ -195,18 +195,19 @@ server {
 
 {% endhighlight %}
 
-Reload nginx and it should be working by now.
+Reinicia Nginx y ya debería estar funcionando.
 
-### 2.2. Page config with support for https and authentication
+### 2.2. Configuración con soporte para https y autenticación
 
-For your site to support a secure connection you'll need to generate your own certificates, buy one, or use [Let's Encrypt][lets-encrypt-page]. Here I'll generate a self-signed cert, but you can choose whatever you like.
+Para que tu sitio soporte una conexión segura vas a tener que generar tus propios certificados, comprar unos, o usar [Let's Encrypt][lets-encrypt-page]. 
+Acá voy a generar un self-signed cert, pero vos podes elegir el que quieras.
 
 ```
 sudo mkdir /etc/nginx/certs && cd /etc/nginx/certs
 openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
 ```
 
-Create a user file.
+Crea un user file.
 
 ```
 sudo sh -c "echo -n 'your-user-name:' >> /etc/nginx/.htpasswd"
@@ -214,7 +215,7 @@ sudo sh -c "openssl passwd -apr1 >> /etc/nginx/.htpasswd"
 sudo chmod 640 /etc/nginx/.htpasswd
 ```
 
-Page config file.
+Config file de tu sitio.
 
 ```
 /etc/nginx/sites-available/rutorrent
@@ -259,13 +260,13 @@ server {
 
 {% endhighlight %}
 
-If your server is facing the internet it's a good idea to [harden your ssl configuration][mozilla-tls-config].
+Si tu servidor esta abierto a internet ["fortalecer" tu configuración][mozilla-tls-config] es una buena idea.
 
 ### 3. ruTorrent config.php
 
-If ruTorrent is complaining about not been able to access an external program like php or curl you have to add its path into pathToExternals in the config.php file. 
+Si ruTorrent se queja de no poder acceder a un programa externo, como php o curl, tenes que agregar su path a pathToExternals en el archivo config.php.
 
-This is an example with the curl's path.
+Este es un ejemplo con el path de curl.
 
 ```
 /var/www/ruTorrent/conf/config.php
@@ -287,15 +288,15 @@ $pathToExternals = array(
 
 {% endhighlight %}
 
-## References
+## Referencias
 
-* [Terminal28][terminal28-tuto] was of great help the first time I installed ruTorrent.
+* [Terminal28][terminal28-tuto] fue de gran ayuda cuando instale ruTorrent por primera vez.
 
 * [Nginx docs][nginx-docs] 
 
-* And other resources around the web
+* Y otros recursos que andan dando vuelta por Internet
 
-And that's it, it should be functional by now. 
+Y eso es todo, ya todo debería estar funcionando.
 
 Have fun ( ´・‿-) ~ ♥
 
