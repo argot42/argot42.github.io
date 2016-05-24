@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Instalar rTorrent y ruTorrent con Nginx (on debian jessie)"
+title:  "Instalar rTorrent y ruTorrent con Nginx (con debian jessie)"
 ref: rtorrent-install
 date:   2016-05-19 02:43:00 -0300
 categories: bittorrent
@@ -120,7 +120,7 @@ ExecStop=/usr/bin/tmux send-keys -t rtorrent:rtorrent C-q
 
 {% endhighlight %}
 
-El nombre del archivo debe ser <nombre-del-servicio>@.service, systemd trata a archivos con esa extensión como unidades que describe ***servicios*** y el @ que es un ***instanced service unit***. Eso, y las directivas, están explicadas [acá][systemd-service], pero básicamente podes hacer esto
+El nombre del archivo debe ser nombre-del-servicio@.service, systemd trata a archivos con esa extensión como unidades que describe ***servicios*** y el @ que es un ***instanced service unit***. Eso, y las directivas, están explicadas [acá][systemd-service] pero básicamente podes hacer esto
 
 ```
 systemctl start rtorrent@<user>
