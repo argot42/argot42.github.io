@@ -118,6 +118,9 @@ User=%i
 ExecStart=/usr/bin/tmux new-session -s rtorrent -n rtorrent -d rtorrent
 ExecStop=/usr/bin/tmux send-keys -t rtorrent:rtorrent C-q
 
+[Install]
+WantedBy=multi-user.target
+
 {% endhighlight %}
 
 The name of the service must be name-of-service@.service, the extension tells systemd this unit describes a ***service*** and the @ that it is a ***instanced service unit***. That, and the directives, are explained [here][systemd-service], but basically you can do this
