@@ -8,4 +8,4 @@ lang: es
 Estudiante de Ingerniería en Sistemas en la UTN, uso GNU+Linux y amo a rms.
 
 
-[❤](https://sushigirl.tokyo "Best chan you'll ever visit")
+[❤](https://sushigirl.us "Best chan you'll ever visit")

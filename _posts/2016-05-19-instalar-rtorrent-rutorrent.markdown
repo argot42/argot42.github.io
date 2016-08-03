@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Instalar rTorrent y ruTorrent con Nginx (con debian jessie)"
+title:  "Instalar rTorrent y ruTorrent con Nginx (en debian jessie)"
 ref: rtorrent-install
 date:   2016-05-19 02:43:00 -0300
 categories: bittorrent
@@ -87,6 +87,102 @@ sudo cp doc/rtorrent.rc /opt/rtorrent/.rtorrent.rc
 ```
 
 Y modificalo como prefieras. [Acá][rtorrent-wiki-repo] vas a encontrar información que te va a ayudar a configurarlo. También vas a necesitar hacer un port forwarding de algunos puertos (revisa en el archivo de configuración para ver en que puertos esta escuchando rTorrent).
+
+Acá un ejemplo de un archivo de configuración de rtorrent
+
+{% highlight python %}
+
+# SCGI
+scgi_port = localhost:5000
+
+# Maximum and minimum number of peers to connect to per torrent.
+min_peers = 1
+max_peers = 50
+
+# Same as above but for seeding completed torrents (-1 = same as downloading)
+min_peers_seed = 1
+max_peers_seed = 50
+
+# Maximum number of simultanious uploads per torrent.
+max_uploads = 5
+
+# Global upload and download rate in KiB. "0" for unlimited.
+download_rate = 500
+upload_rate = 30
+
+# Default directory to save the downloaded torrents.
+directory = /mnt/r/torrent
+
+# Default session directory. Make sure you don't run multiple instance
+# of rtorrent using the same session directory. Perhaps using a
+# relative path?
+session = /opt/rtorrent/session
+
+# Watch a directory for new torrents, and stop those that have been
+# deleted.
+schedule = watch_directory, 5, 5, load.start=/opt/rtorrent/watch/*.torrent
+schedule = untied_directory, 5, 5, stop_untied=
+schedule = tied_directory, 5, 5, start_tied=
+
+# Close torrents when diskspace is low. 
+schedule = low_diskspace,5,60,close_low_diskspace=100M
+
+# throttle schedule
+# - night - #
+schedule = throttle_d_off,03:00:00,24:00:00,download_rate=0
+schedule = throttle_u_off,03:00:00,24:00:00,upload_rate=0
+
+# - day - #
+schedule = throttle_d_on,06:30:00,24:00:00,download_rate=500
+schedule = throttle_u_on,06:30:00,24:00:00,upload_rate=30
+
+# The ip address reported to the tracker.
+#ip = 127.0.0.1
+#ip = rakshasa.no
+
+# The ip address the listening socket and outgoing connections is
+# bound to.
+#bind = 127.0.0.1
+#bind = rakshasa.no
+
+# Port range to use for listening.
+port_range = 6881-6889
+
+# Start opening ports at a random position within the port range.
+port_random = yes
+
+# Check hash for finished torrents. Might be usefull until the bug is
+# fixed that causes lack of diskspace not to be properly reported.
+check_hash = yes
+
+# Set whether the client should try to connect to UDP trackers.
+trackers.use_udp.set = yes
+
+# Alternative calls to bind and ip that should handle dynamic ip's.
+#schedule = ip_tick,0,1800,ip=rakshasa
+#schedule = bind_tick,0,1800,bind=rakshasa
+
+# Encryption options, set to none (default) or any combination of the following:
+# allow_incoming, try_outgoing, require, require_RC4, enable_retry, prefer_plaintext
+#
+# The example value allows incoming encrypted connections, starts unencrypted
+# outgoing connections but retries with encryption if they fail, preferring
+# plaintext to RC4 encryption after the encrypted handshake
+#
+encryption = allow_incoming,enable_retry,prefer_plaintext
+
+# Enable DHT support for trackerless torrents or when all trackers are down.
+# May be set to "disable" (completely disable DHT), "off" (do not start DHT),
+# "auto" (start and stop DHT as needed), or "on" (start DHT immediately).
+# The default is "off". For DHT to work, a session directory must be defined.
+# 
+dht = auto
+
+# UDP port to use for DHT. 
+# 
+dht_port = 63425
+
+{% endhighlight %}
 
 Ahora rTorrent debería estar funcionando. Para testearlo logeate con el usuario rTorrent (generale una contraseña con passwd si no lo hiciste) y ejecutalo.
 
@@ -197,6 +293,13 @@ server {
 }
 
 {% endhighlight %}
+
+Elimina el symlink 'default' en /etc/nginx/sites-enabled y crea uno para rutorrent
+
+```
+sudo rm /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/rutorrent /etc/nginx/sites-enabled/rutorrent
+```
 
 Reinicia Nginx y ya debería estar funcionando.
 
