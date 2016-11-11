@@ -29,7 +29,7 @@ You are going to need these to download the repos and compile them.
 ### 1. Install dependencies
 
 ```
-sudo apt-get install libsigc++-2.0-dev libncurses5-dev curl libcurl4-openssl-dev libcppunit-dev
+sudo apt-get install libsigc++-2.0-dev libncurses5-dev curl libcurl4-openssl-dev libcppunit-dev zlib1g-dev
 ```
 
 ### 2. Install XMLRPC

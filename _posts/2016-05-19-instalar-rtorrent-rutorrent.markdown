@@ -29,7 +29,7 @@ Vas a necesitar estas para descargar los repositorios y compilarlos.
 ### 1. Instalar dependencias
 
 ```
-sudo apt-get install libsigc++-2.0-dev libncurses5-dev curl libcurl4-openssl-dev libcppunit-dev
+sudo apt-get install libsigc++-2.0-dev libncurses5-dev curl libcurl4-openssl-dev libcppunit-dev zlib1g-dev
 ```
 
 ### 2. Instalar XMLRPC
