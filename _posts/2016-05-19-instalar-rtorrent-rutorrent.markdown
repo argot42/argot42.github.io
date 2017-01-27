@@ -49,7 +49,7 @@ sudo make install
 Clona el [repositorio][libtorrent-repo] de Libtorrent y compilalo.
 
 ```
-git clone https://github.com/rakshasa/libtorrent
+git clone -b feature-bind https://github.com/rakshasa/libtorrent
 cd libtorrent
 ./autogen.sh
 ./configure
@@ -62,7 +62,7 @@ sudo make install
 Clona el [repositorio][rtorrent-repo] de rTorrent y compilalo.
 
 ```
-git clone https://github.com/rakshasa/rtorrent
+git clone -b feature-bind https://github.com/rakshasa/rtorrent
 cd rtorrent
 ./autogen.sh
 ./configure --with-xmlrpc-c
@@ -93,74 +93,60 @@ Acá un ejemplo de un archivo de configuración de rtorrent
 {% highlight python %}
 
 # SCGI
-scgi_port = localhost:5000
+network.scgi.open_port = 127.0.0.1:5000
+encoding.add = UTF-8
 
 # Maximum and minimum number of peers to connect to per torrent.
-min_peers = 1
-max_peers = 50
+throttle.min_peers.normal.set = 1
+throttle.max_peers.normal.set = 50
 
 # Same as above but for seeding completed torrents (-1 = same as downloading)
-min_peers_seed = 1
-max_peers_seed = 50
+throttle.min_peers.seed.set = -1
+throttle.max_peers.seed.set = -1
 
 # Maximum number of simultanious uploads per torrent.
-max_uploads = 5
+throttle.max_uploads.set = 5
 
 # Global upload and download rate in KiB. "0" for unlimited.
 download_rate = 500
 upload_rate = 30
+throttle.global_down.max_rate.set_kb = 500
+throttle.global_up.max_rate.set_kb = 30
 
 # Default directory to save the downloaded torrents.
-directory = /mnt/r/torrent
+directory.default.set = /opt/rtorrent/downloads
 
-# Default session directory. Make sure you don't run multiple instance
-# of rtorrent using the same session directory. Perhaps using a
-# relative path?
-session = /opt/rtorrent/session
+# Default session directory. Don't run multiple instance 
+# of rtorrent using the same session directory
+session.path.set = /opt/rtorrent/session
 
 # Watch a directory for new torrents, and stop those that have been
 # deleted.
-schedule = watch_directory, 5, 5, load.start=/opt/rtorrent/watch/*.torrent
-schedule = untied_directory, 5, 5, stop_untied=
-schedule = tied_directory, 5, 5, start_tied=
+schedule2 = watch_directory, 5, 5, load.start=/opt/rtorrent/watch/*.torrent
+schedule2 = untied_directory, 5, 5, stop_untied=
+schedule2 = tied_directory, 5, 5, start_tied=
 
-# Close torrents when diskspace is low. 
-schedule = low_diskspace,5,60,close_low_diskspace=100M
+# Close torrents when diskspace is low.
+schedule2 = low_diskspace, 5, 60, close_low_diskspace=100M
 
 # throttle schedule
 # - night - #
-schedule = throttle_d_off,03:00:00,24:00:00,download_rate=0
-schedule = throttle_u_off,03:00:00,24:00:00,upload_rate=0
+schedule2 = throttle_d_off, 03:00:00, 24:00:00, throttle.global_down.max_rate.set_kb=0
+schedule2 = throttle_u_off, 03:00:00, 24:00:00, throttle.global_up.max_rate.set_kb=0
 
 # - day - #
-schedule = throttle_d_on,06:30:00,24:00:00,download_rate=500
-schedule = throttle_u_on,06:30:00,24:00:00,upload_rate=30
-
-# The ip address reported to the tracker.
-#ip = 127.0.0.1
-#ip = rakshasa.no
-
-# The ip address the listening socket and outgoing connections is
-# bound to.
-#bind = 127.0.0.1
-#bind = rakshasa.no
+schedule2 = throttle_d_on, 06:30:00, 24:00:00, throttle.global_down.max_rate.set_kb=500
+schedule2 = throttle_u_off, 06:30:00, 24:00:00, throttle.global_up.max_rate.set_kb=30
 
 # Port range to use for listening.
-port_range = 6881-6889
+network.port_range.set = 6881-6889
+network.port_random.set = yes
 
-# Start opening ports at a random position within the port range.
-port_random = yes
-
-# Check hash for finished torrents. Might be usefull until the bug is
-# fixed that causes lack of diskspace not to be properly reported.
-check_hash = yes
+# Check hash on finished torrents.
+pieces.hash.on_completion.set = yes
 
 # Set whether the client should try to connect to UDP trackers.
 trackers.use_udp.set = yes
-
-# Alternative calls to bind and ip that should handle dynamic ip's.
-#schedule = ip_tick,0,1800,ip=rakshasa
-#schedule = bind_tick,0,1800,bind=rakshasa
 
 # Encryption options, set to none (default) or any combination of the following:
 # allow_incoming, try_outgoing, require, require_RC4, enable_retry, prefer_plaintext
@@ -169,18 +155,18 @@ trackers.use_udp.set = yes
 # outgoing connections but retries with encryption if they fail, preferring
 # plaintext to RC4 encryption after the encrypted handshake
 #
-encryption = allow_incoming,enable_retry,prefer_plaintext
+protocol.encryption.set = allow_incoming,enable_retry,prefer_plaintext
 
 # Enable DHT support for trackerless torrents or when all trackers are down.
 # May be set to "disable" (completely disable DHT), "off" (do not start DHT),
 # "auto" (start and stop DHT as needed), or "on" (start DHT immediately).
 # The default is "off". For DHT to work, a session directory must be defined.
-# 
-dht = auto
+#
+dht.mode.set = auto
 
-# UDP port to use for DHT. 
-# 
-dht_port = 63425
+# UDP port to use for DHT.
+#
+dht.port.set = 63425
 
 {% endhighlight %}
 
@@ -279,12 +265,10 @@ server {
     location /RPC2 {
         include scgi_params;
         scgi_pass 127.0.0.1:5000;
-        scgi_params SCRIPT_NAME /RPC2;
     }
     
     location ~ \.php$ {
         try_files $uri =404;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass unix:///var/run/php5-fpm.sock;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $request_filename;
@@ -351,12 +335,10 @@ server {
     location /RPC2 {
         include scgi_params;
         scgi_pass 127.0.0.1:5000;
-        scgi_params SCRIPT_NAME /RPC2;
     }
     
     location ~ \.php$ {
         try_files $uri =404;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass unix:///var/run/php5-fpm.sock;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $request_filename;
