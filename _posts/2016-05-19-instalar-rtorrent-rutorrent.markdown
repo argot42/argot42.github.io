@@ -136,7 +136,7 @@ schedule2 = throttle_u_off, 03:00:00, 24:00:00, throttle.global_up.max_rate.set_
 
 # - day - #
 schedule2 = throttle_d_on, 06:30:00, 24:00:00, throttle.global_down.max_rate.set_kb=500
-schedule2 = throttle_u_off, 06:30:00, 24:00:00, throttle.global_up.max_rate.set_kb=30
+schedule2 = throttle_u_on, 06:30:00, 24:00:00, throttle.global_up.max_rate.set_kb=30
 
 # Port range to use for listening.
 network.port_range.set = 6881-6889
