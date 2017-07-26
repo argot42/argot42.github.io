@@ -49,7 +49,7 @@ sudo make install
 Clona el [repositorio][libtorrent-repo] de Libtorrent y compilalo.
 
 ```
-git clone -b feature-bind https://github.com/rakshasa/libtorrent
+git clone -b https://github.com/rakshasa/libtorrent
 cd libtorrent
 ./autogen.sh
 ./configure
@@ -62,7 +62,7 @@ sudo make install
 Clona el [repositorio][rtorrent-repo] de rTorrent y compilalo.
 
 ```
-git clone -b feature-bind https://github.com/rakshasa/rtorrent
+git clone -b https://github.com/rakshasa/rtorrent
 cd rtorrent
 ./autogen.sh
 ./configure --with-xmlrpc-c
