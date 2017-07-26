@@ -49,7 +49,7 @@ sudo make install
 Clone rakshasa Libtorrent [repo][libtorrent-repo] and compile.
 
 ```
-git clone -b https://github.com/rakshasa/libtorrent
+git clone https://github.com/rakshasa/libtorrent
 cd libtorrent
 ./autogen.sh
 ./configure
@@ -62,7 +62,7 @@ sudo make install
 Clone rakshasa rTorrent [repo][rtorrent-repo] and compile it.
 
 ```
-git clone -b https://github.com/rakshasa/rtorrent
+git clone https://github.com/rakshasa/rtorrent
 cd rtorrent
 ./autogen.sh
 ./configure --with-xmlrpc-c
