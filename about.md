@@ -5,7 +5,7 @@ title: About
 ref: about
 lang: en
 ---
-UTN Systems Engineering student and GNU+Linux enthusiast. I love rms.
+UTN Systems Engineering student.
 
 
 [❤](https://sushigirl.us "Best chan you'll ever visit")
