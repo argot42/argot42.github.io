@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="uft-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    
+    
+    <title>lonely terminal_ | Installing rTorrent and ruTorrent with nginx (on debian jessie)</title>
+</head>
+<body>
+        <div id="header">
+    <a id="header-title" href="/">lonely terminal</a>
+    <span id="header-copete">Yet another blog about computers</span>
+</div>
+<div id="content">
+<div id="article">
+    <h1 id="article-title">Installing rTorrent and ruTorrent with nginx (on debian jessie)</h1>
+    <div id="article-date">Thursday 19, May 2016</div>
+    <div id="article-content"><h2 id="preparing-to-install">Preparing to Install</h2>
+<h3 id="1-set-up-new-user">1. Set up new user</h3>
+<pre><code>sudo useradd -d /opt/rtorrent -m rtorrent
+</code></pre><h3 id="2-install-some-tools">2. Install some tools</h3>
+<pre><code>sudo apt-get install subversion git build-essential automake libtool pkg-config
+</code></pre><p>You are going to need these to download the repos and compile them.</p>
+<h2 id="libtorrentrtorrent">Libtorrent+rTorrent</h2>
+<h3 id="1-install-dependencies">1. Install dependencies</h3>
+<pre><code>sudo apt-get install libsigc++-2.0-dev libncurses5-dev curl libcurl4-openssl-dev libcppunit-dev zlib1g-dev libssl-dev
+</code></pre><h3 id="2-install-xmlrpc">2. Install XMLRPC</h3>
+<p>Download the <a href="http://svn.code.sf.net/p/xmlrpc-c/code/stable">repository</a> and compile it.</p>
+<pre><code>svn checkout http://svn.code.sf.net/p/xmlrpc-c/code/stable xmlrpc-c
+cd xmlrpc-c
+./configure --disable-cplusplus
+make
+sudo make install
+</code></pre><h3 id="3-install-libtorrent">3. Install Libtorrent</h3>
+<p>Clone rakshasa Libtorrent <a href="https://github.com/rakshasa/libtorrent">repo</a> and compile.</p>
+<pre><code>git clone https://github.com/rakshasa/libtorrent
+cd libtorrent
+./autogen.sh
+./configure
+make
+sudo make install
+</code></pre><h3 id="4-install-rtorrent">4. Install rTorrent</h3>
+<p>Clone rakshasa rTorrent <a href="https://github.com/rakshasa/rtorrent/wiki">repo</a> and compile it.</p>
+<pre><code>git clone https://github.com/rakshasa/rtorrent
+cd rtorrent
+./autogen.sh
+./configure --with-xmlrpc-c
+make
+sudo make install
+sudo ldconfig
+</code></pre><h3 id="5-set-up-rtorrent">5. Set up rTorrent</h3>
+<p>Create directories needed.</p>
+<pre><code>sudo mkdir -p /opt/rtorrent/{session,watch}
+sudo chown -R rtorrent: /opt/rtorrent
+</code></pre><p>Copy config file that came with the source code to rTorrent&rsquo;s home directory.</p>
+<pre><code>sudo cp doc/rtorrent.rc /opt/rtorrent/.rtorrent.rc
+</code></pre><p>And modify it as you see fit. You can find resources to help you setting up your config file <a href="https://github.com/rakshasa/rtorrent/wiki">here</a>. You Also will need to port forward the necessary ports (check in your config file on what ports did you set rTorrent to listen).</p>
+<p>Here is an example of a rtorrent config file</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cfg" data-lang="cfg"><span style="font-style:italic"># SCGI</span>
+network.scgi.open_port = <span style="font-style:italic">127.0.0.1:5000</span>
+encoding.add = <span style="font-style:italic">UTF-8</span>
+
+<span style="font-style:italic"># Maximum and minimum number of peers to connect to per torrent.</span>
+throttle.min_peers.normal.set = <span style="font-style:italic">1</span>
+throttle.max_peers.normal.set = <span style="font-style:italic">50</span>
+
+<span style="font-style:italic"># Same as above but for seeding completed torrents (-1 = same as downloading)</span>
+throttle.min_peers.seed.set = <span style="font-style:italic">-1</span>
+throttle.max_peers.seed.set = <span style="font-style:italic">-1</span>
+
+<span style="font-style:italic"># Maximum number of simultanious uploads per torrent.</span>
+throttle.max_uploads.set = <span style="font-style:italic">5</span>
+
+<span style="font-style:italic"># Global upload and download rate in KiB. &#34;0&#34; for unlimited.</span>
+download_rate = <span style="font-style:italic">500</span>
+upload_rate = <span style="font-style:italic">30</span>
+throttle.global_down.max_rate.set_kb = <span style="font-style:italic">500</span>
+throttle.global_up.max_rate.set_kb = <span style="font-style:italic">30</span>
+
+<span style="font-style:italic"># Default directory to save the downloaded torrents.</span>
+directory.default.set = <span style="font-style:italic">/opt/rtorrent/downloads</span>
+
+<span style="font-style:italic"># Default session directory. Don&#39;t run multiple instance </span>
+<span style="font-style:italic"># of rtorrent using the same session directory</span>
+session.path.set = <span style="font-style:italic">/opt/rtorrent/session</span>
+
+<span style="font-style:italic"># Watch a directory for new torrents, and stop those that have been</span>
+<span style="font-style:italic"># deleted.</span>
+schedule2 = <span style="font-style:italic">watch_directory, 5, 5, load.start=/opt/rtorrent/watch/*.torrent</span>
+schedule2 = <span style="font-style:italic">untied_directory, 5, 5, stop_untied=</span>
+schedule2 = <span style="font-style:italic">tied_directory, 5, 5, start_tied=</span>
+
+<span style="font-style:italic"># Close torrents when diskspace is low.</span>
+schedule2 = <span style="font-style:italic">low_diskspace, 5, 60, close_low_diskspace=100M</span>
+
+<span style="font-style:italic"># throttle schedule</span>
+<span style="font-style:italic"># - night - #</span>
+schedule2 = <span style="font-style:italic">throttle_d_off, 03:00:00, 24:00:00, throttle.global_down.max_rate.set_kb=0</span>
+schedule2 = <span style="font-style:italic">throttle_u_off, 03:00:00, 24:00:00, throttle.global_up.max_rate.set_kb=0</span>
+
+<span style="font-style:italic"># - day - #</span>
+schedule2 = <span style="font-style:italic">throttle_d_on, 06:30:00, 24:00:00, throttle.global_down.max_rate.set_kb=500</span>
+schedule2 = <span style="font-style:italic">throttle_u_on, 06:30:00, 24:00:00, throttle.global_up.max_rate.set_kb=30</span>
+
+<span style="font-style:italic"># Port range to use for listening.</span>
+network.port_range.set = <span style="font-style:italic">6881-6889</span>
+network.port_random.set = <span style="font-style:italic">yes</span>
+
+<span style="font-style:italic"># Check hash on finished torrents.</span>
+pieces.hash.on_completion.set = <span style="font-style:italic">yes</span>
+
+<span style="font-style:italic"># Set whether the client should try to connect to UDP trackers.</span>
+trackers.use_udp.set = <span style="font-style:italic">yes</span>
+
+<span style="font-style:italic"># Encryption options, set to none (default) or any combination of the following:</span>
+<span style="font-style:italic"># allow_incoming, try_outgoing, require, require_RC4, enable_retry, prefer_plaintext</span>
+<span style="font-style:italic">#</span>
+<span style="font-style:italic"># The example value allows incoming encrypted connections, starts unencrypted</span>
+<span style="font-style:italic"># outgoing connections but retries with encryption if they fail, preferring</span>
+<span style="font-style:italic"># plaintext to RC4 encryption after the encrypted handshake</span>
+<span style="font-style:italic">#</span>
+protocol.encryption.set = <span style="font-style:italic">allow_incoming,enable_retry,prefer_plaintext</span>
+
+<span style="font-style:italic"># Enable DHT support for trackerless torrents or when all trackers are down.</span>
+<span style="font-style:italic"># May be set to &#34;disable&#34; (completely disable DHT), &#34;off&#34; (do not start DHT),</span>
+<span style="font-style:italic"># &#34;auto&#34; (start and stop DHT as needed), or &#34;on&#34; (start DHT immediately).</span>
+<span style="font-style:italic"># The default is &#34;off&#34;. For DHT to work, a session directory must be defined.</span>
+<span style="font-style:italic">#</span>
+dht.mode.set = <span style="font-style:italic">auto</span>
+
+<span style="font-style:italic"># UDP port to use for DHT.</span>
+<span style="font-style:italic">#</span>
+dht.port.set = <span style="font-style:italic">63425</span></code></pre></div>
+<p>Now rTorrent should be working. To test it, log into the rTorrent user (set up it up a password if you didn&rsquo;t) and run rTorrent.</p>
+<h3 id="6-auto-starting-rtorrent-with-systemd-units">6. Auto starting rTorrent with systemd-units</h3>
+<p>First install <a href="http://tmuxp.readthedocs.io/en/latest/about_tmux.html">tmux</a> to run rTorrent without needing a terminal open (and be able to attach it later if you want to).</p>
+<pre><code>sudo apt-get install tmux
+</code></pre><p>Create systemd unit.</p>
+<pre><code>/etc/systemd/system/rtorrent@.service
+</code></pre><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ini" data-lang="ini"><span style="font-weight:bold">[Unit]</span>
+Description=<span style="font-style:italic">rTorrent</span>
+Requires=<span style="font-style:italic">network.target local-fs.target</span>
+
+<span style="font-weight:bold">[Service]</span>
+Type=<span style="font-style:italic">oneshot</span>
+RemainAfterExit=<span style="font-style:italic">yes</span>
+KillMode=<span style="font-style:italic">none</span>
+User=<span style="font-style:italic">%i</span>
+ExecStart=<span style="font-style:italic">/usr/bin/tmux new-session -s rtorrent -n rtorrent -d rtorrent</span>
+ExecStop=<span style="font-style:italic">/usr/bin/tmux send-keys -t rtorrent:rtorrent C-q</span>
+
+<span style="font-weight:bold">[Install]</span>
+WantedBy=<span style="font-style:italic">multi-user.target</span></code></pre></div>
+<p>The name of the service must be name-of-service@.service, the extension tells systemd this unit describes a <em><strong>service</strong></em> and the @ that it is a <em><strong>instanced service unit</strong></em>. That, and the directives, are explained <a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html">here</a>, but basically you can do this</p>
+<pre><code>systemctl start rtorrent@&lt;user&gt;
+</code></pre><p>and run multiples instances of the service with different users (%i is replaced by the user after the @).</p>
+<p>Now for rTorrent to run automatically when the system starts just enable the unit.</p>
+<pre><code>systemctl enable rtorrent@&lt;user&gt;
+</code></pre><h2 id="rutorrent">ruTorrent</h2>
+<h3 id="1-install-dependencies-1">1. Install dependencies</h3>
+<p>Having rTorrent working, you will now install the sofware needed for ruTorrent, some of its plugins and nginx.</p>
+<pre><code>sudo apt-get install nginx php5 php5-cli php5-fpm php5-xmlrpc mediainfo unrar-free 
+</code></pre><p>Clone the ruTorrent <a href="https://github.com/Novik/ruTorrent">repo</a>.</p>
+<pre><code>sudo git clone https://github.com/Novik/ruTorrent
+</code></pre><h3 id="2-set-up-nginx">2. Set up Nginx</h3>
+<p>Move rTorrent repo where you like to have your website (I&rsquo;m going to use /var/www) and change the ownership of some directories.</p>
+<pre><code>sudo mv rTorrent /var/www
+sudo chown -R www-data: /var/www/ruTorrent/share/{setting,rtorrents}
+sudo chown -R rtorrent: /var/www/ruTorrent/share/users
+</code></pre><h3 id="21-create-page-config">2.1. Create page config</h3>
+<p>Create the next file but be careful this configuration is not secured with password so everybody with access to your port 80 will be able to mess around with rTorrent <del>and potentially delete all your anime collection</del>. If the port is not facing the internet it shouldn&rsquo;t be a big problem but it&rsquo;ll be better if you use it just for testing and eventually update your configuration to match the one in the part 2.2.</p>
+<pre><code>/etc/nginx/sites-available/rutorrent
+</code></pre><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="font-weight:bold">server</span> {
+    <span style="font-weight:bold">listen</span> 80;
+    <span style="font-weight:bold">root</span> <span style="font-style:italic">/var/www/ruTorrent</span>;
+
+    <span style="font-weight:bold">error_log</span> <span style="font-style:italic">/var/log/nginx/rutorrent_error.log</span>;
+    <span style="font-weight:bold">access_log</span> <span style="font-style:italic">/var/log/nginx/rutorrent_access.log</span>;
+
+    <span style="font-weight:bold">location</span> <span style="font-style:italic">/RPC2</span> {
+        <span style="font-weight:bold">scgi_pass</span> 127.0.0.1:5000;
+        <span style="font-weight:bold">include</span> <span style="font-style:italic">scgi_params</span>;
+    }
+    
+    <span style="font-weight:bold">location</span> ~ <span style="font-style:italic">\.php$</span> {
+        <span style="font-weight:bold">try_files</span> $uri =404;
+        <span style="font-weight:bold">fastcgi_pass</span> <span style="font-style:italic">unix:///var/run/php5-fpm.sock</span>;
+        <span style="font-weight:bold">include</span> <span style="font-style:italic">fastcgi_params</span>;
+        <span style="font-weight:bold">fastcgi_param</span> <span style="font-style:italic">SCRIPT_FILENAME</span> $request_filename;
+        <span style="font-weight:bold">fastcgi_read_timeout</span> 300;
+    }
+}</code></pre></div>
+<p>Remove the symlink on /etc/nginx/sites-enabled to the default page and create one for rutorrent</p>
+<pre><code>sudo rm /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/rutorrent /etc/nginx/sites-enabled/rutorrent
+</code></pre><p>Reload nginx and it should be working by now.</p>
+<h3 id="22-page-config-with-support-for-https-and-authentication">2.2. Page config with support for https and authentication</h3>
+<p>For your site to support a secure connection you&rsquo;ll need to generate your own certificates, buy one, or use <a href="https://letsencrypt.org/getting-started/">Let&rsquo;s Encrypt</a>. Here I&rsquo;ll generate a self-signed cert, but you can choose whatever you like.</p>
+<pre><code>sudo mkdir /etc/nginx/certs &amp;&amp; cd /etc/nginx/certs
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+</code></pre><p>Create a user file.</p>
+<pre><code>sudo sh -c &quot;echo -n 'your-user-name:' &gt;&gt; /etc/nginx/.htpasswd&quot;
+sudo sh -c &quot;openssl passwd -apr1 &gt;&gt; /etc/nginx/.htpasswd&quot;
+sudo chmod 640 /etc/nginx/.htpasswd
+</code></pre><p>Page config file.</p>
+<pre><code>/etc/nginx/sites-available/rutorrent
+</code></pre><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="font-weight:bold">server</span> {
+    <span style="font-weight:bold">listen</span> 443 <span style="font-style:italic">ssl</span>;
+    <span style="font-weight:bold">root</span> <span style="font-style:italic">/var/www/ruTorrent</span>;
+
+    <span style="font-weight:bold">error_log</span> <span style="font-style:italic">/var/log/nginx/rutorrent_error.log</span>;
+    <span style="font-weight:bold">access_log</span> <span style="font-style:italic">/var/log/nginx/rutorrent_access.log</span>;
+
+    <span style="font-style:italic">################################################
+</span><span style="font-style:italic"></span>    <span style="font-weight:bold">ssl_certificate</span> <span style="font-style:italic">/etc/nginx/certs/cert.pem</span>;
+    <span style="font-weight:bold">ssl_certificate_key</span> <span style="font-style:italic">/etc/nginx/certs/key.pem</span>; 
+
+    <span style="font-weight:bold">location</span> <span style="font-style:italic">/</span> {
+        <span style="font-weight:bold">try_files</span> $uri $uri/ =404;
+        
+        <span style="font-weight:bold">auth_basic</span> <span style="font-style:italic">&#34;Restricted</span> <span style="font-style:italic">Content&#34;</span>;
+        <span style="font-weight:bold">auth_basic_user_file</span> <span style="font-style:italic">/etc/nginx/.htpasswd</span>;
+    }
+    <span style="font-style:italic">################################################
+</span><span style="font-style:italic"></span>
+    <span style="font-weight:bold">location</span> <span style="font-style:italic">/RPC2</span> {
+        <span style="font-weight:bold">scgi_pass</span> 127.0.0.1:5000;
+        <span style="font-weight:bold">include</span> <span style="font-style:italic">scgi_params</span>;
+    }
+    
+    <span style="font-weight:bold">location</span> ~ <span style="font-style:italic">\.php$</span> {
+        <span style="font-weight:bold">try_files</span> $uri =404;
+        <span style="font-weight:bold">fastcgi_pass</span> <span style="font-style:italic">unix:///var/run/php5-fpm.sock</span>;
+        <span style="font-weight:bold">include</span> <span style="font-style:italic">fastcgi_params</span>;
+        <span style="font-weight:bold">fastcgi_param</span> <span style="font-style:italic">SCRIPT_FILENAME</span> $request_filename;
+        <span style="font-weight:bold">fastcgi_read_timeout</span> 300;
+    }
+}</code></pre></div>
+<p>If your server is facing the internet it&rsquo;s a good idea to <a href="https://wiki.mozilla.org/Security/Server_Side_TLS">harden your ssl configuration</a>.</p>
+<h3 id="3-rutorrent-configphp">3. ruTorrent config.php</h3>
+<p>If ruTorrent is complaining about not been able to access an external program like php or curl you have to add its path into pathToExternals in the config.php file.</p>
+<p>This is an example with the curl&rsquo;s path.</p>
+<pre><code>/var/www/ruTorrent/conf/config.php
+</code></pre><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-php" data-lang="php">...
+
+$pathToExternals = <span style="font-weight:bold">array</span>(
+                <span style="font-style:italic">&#34;php&#34;</span>   =&gt; <span style="font-style:italic">&#39;&#39;</span>,                  <span style="font-style:italic">// Something like /usr/bin/php. If empty, will be found in PATH.
+</span><span style="font-style:italic"></span>                <span style="font-style:italic">&#34;curl&#34;</span>  =&gt; <span style="font-style:italic">&#39;/usr/bin/curl&#39;</span>,                     <span style="font-style:italic">// Something like /usr/bin/curl. If empty, will be found in PATH.
+</span><span style="font-style:italic"></span>                <span style="font-style:italic">&#34;gzip&#34;</span>  =&gt; <span style="font-style:italic">&#39;&#39;</span>,                  <span style="font-style:italic">// Something like /usr/bin/gzip. If empty, will be found in PATH.
+</span><span style="font-style:italic"></span>                <span style="font-style:italic">&#34;id&#34;</span>    =&gt; <span style="font-style:italic">&#39;&#39;</span>,                  <span style="font-style:italic">// Something like /usr/bin/id. If empty, will be found in PATH.
+</span><span style="font-style:italic"></span>                <span style="font-style:italic">&#34;stat&#34;</span>  =&gt; <span style="font-style:italic">&#39;&#39;</span>,                  <span style="font-style:italic">// Something like /usr/bin/stat. If empty, will be found in PATH.
+</span><span style="font-style:italic"></span>        );
+
+...
+</code></pre></div>
+<h2 id="references">References</h2>
+<ul>
+<li>
+<p><a href="https://terminal28.com/how-to-install-and-configure-rutorrent-rtorrent-libtorrent-xmlrpc-screen-debian-7-wheezy/">Terminal28</a> was of great help the first time I installed ruTorrent.</p>
+</li>
+<li>
+<p><a href="http://nginx.org/en/docs/">Nginx docs</a></p>
+</li>
+<li>
+<p>And other resources around the web</p>
+</li>
+</ul>
+<p>And that&rsquo;s it, it should be functional by now.</p>
+<p>Have fun ( ´・‿-) ~ ♥</p>
+</div>
+</div>
+
+</div>
+
+        
+    <body>
+</html>

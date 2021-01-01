@@ -1,0 +1,68 @@
+#main-header > * {
+    margin: 0
+}
+
+#main-header {
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+}
+
+#main {
+    margin-left: 15em;
+    margin-right: 15em;
+}
+
+#main-copete {
+    font-weight: normal;
+}
+
+.main-posts {
+    margin-bottom: 0.5em;
+}
+
+.main-summary {
+    margin-left: 1em;
+}
+
+.main-post-date {
+    font-size: 0.8em;
+    color: gray;
+}
+
+#header {
+    border-top: 1px solid;
+    font-size: 90%;
+    padding: .2em 0 .2em 0;
+    background-color: lightgrey;
+}
+
+#header-title {
+    font-weight: bold;
+    margin: 0 2em 0 2em;
+    color: black;
+}
+
+#header-copete {
+    font-size: 85%;
+}
+
+body {
+    margin: 0;
+}
+
+#article {
+    margin: 0 15% 0 15%;
+}
+
+#article-title {
+    text-align: center;
+    margin-bottom: 0;
+}
+
+#article-date {
+    text-align: center;
+}
+
+#article-content {
+    line-height: 1.6;
+}
